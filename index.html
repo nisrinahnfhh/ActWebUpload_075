@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unggah & Kelola Berkas</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         .modal {
             display: none;
             position: fixed;
+            inset: 0;
             z-index: 50;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
         }
 
         .modal.active {
@@ -24,59 +24,60 @@
         }
 
         .modal-image {
-            max-width: 100%;
+            max-width: 90%;
             max-height: 80vh;
-            border-radius: 0.5rem;
+            border-radius: 18px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
         .close-btn {
             position: absolute;
-            top: 1rem;
-            right: 1.5rem;
-            font-size: 2rem;
-            font-weight: bold;
-            cursor: pointer;
-            color: #fff;
-            background-color: rgba(0, 0, 0, 0.5);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            top: -14px;
+            right: -14px;
+            width: 42px;
+            height: 42px;
+            border-radius: 9999px;
+            background: #ffffff;
+            color: #111827;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            font-size: 26px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
         .close-btn:hover {
-            background-color: rgba(0, 0, 0, 0.8);
+            transform: scale(1.05);
         }
 
         .file-type-badge {
-            padding: 0.25rem 0.75rem;
+            padding: 4px 12px;
             border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .3px;
         }
 
         .badge-image {
-            background-color: #dbeafe;
-            color: #0369a1;
+            background: #dbeafe;
+            color: #1d4ed8;
         }
 
         .badge-other {
-            background-color: #f3e8ff;
-            color: #7e22ce;
+            background: #ede9fe;
+            color: #7c3aed;
         }
 
         .loading-spinner {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid rgba(59, 130, 246, 0.3);
-            border-top: 2px solid #3b82f6;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            width: 18px;
+            height: 18px;
+            border-radius: 9999px;
+            border: 2px solid #cbd5e1;
+            border-top-color: #2563eb;
+            animation: spin .8s linear infinite;
         }
 
         @keyframes spin {
@@ -84,205 +85,440 @@
                 transform: rotate(360deg);
             }
         }
+
+        .glass-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col items-center justify-start p-6">
 
-    <!-- Modal untuk preview gambar -->
+<body class="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 p-5 md:p-8">
+
+    <!-- Modal Preview -->
     <div id="imageModal" class="modal">
-        <div style="position: relative;">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div class="relative">
+            <button class="close-btn" onclick="closeModal()">
+                &times;
+            </button>
+
             <img id="modalImage" class="modal-image" alt="Preview">
         </div>
     </div>
 
-    <!-- HALAMAN 1: UPLOAD BERKAS -->
-    <div id="page-upload" class="w-full max-w-2xl">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12 text-center">
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">Unggah Lampiran</h1>
-            <p class="text-sm text-gray-500 mb-10">Format: JPG, JPEG, PNG, GIF, DOCX, PDF (Max: 500KB)</p>
-            
+    <!-- PAGE UPLOAD -->
+    <div id="page-upload" class="max-w-3xl mx-auto">
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 mb-3">
+                Unggah Berkas
+            </h1>
+
+            <p class="text-slate-500 text-sm md:text-base">
+                Format yang didukung:
+                JPG, JPEG, PNG, GIF, DOCX, PDF
+            </p>
+
+            <p class="text-slate-400 text-sm mt-1">
+                Maksimal ukuran file: 500KB
+            </p>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="glass-card rounded-3xl shadow-2xl border border-white/60 p-6 md:p-10">
+
             <form action="upload.php" method="post" enctype="multipart/form-data" class="space-y-8">
-                <label class="border-4 border-dashed border-blue-300 bg-blue-50 rounded-2xl p-12 md:p-16 flex flex-col items-center justify-center cursor-pointer">
-                    <input type="file" name="fileToUpload" id="fileToUpload" class="hidden" onchange="updateFileName()">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-blue-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    <span id="file-label" class="text-lg text-gray-600 font-semibold">Klik atau seret berkas ke sini</span>
+
+                <!-- Upload Area -->
+                <label class="group border-2 border-dashed border-blue-300 hover:border-blue-500 transition-all duration-300 rounded-3xl bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 p-10 md:p-16 flex flex-col items-center justify-center text-center cursor-pointer">
+
+                    <input
+                        type="file"
+                        name="fileToUpload"
+                        id="fileToUpload"
+                        class="hidden"
+                        onchange="updateFileName()"
+                    >
+
+                    <div class="w-24 h-24 rounded-full bg-white shadow-lg flex items-center justify-center mb-6 group-hover:scale-105 transition">
+
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-12 w-12 text-blue-500"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+
+                            <path stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+
+                    </div>
+
+                    <span id="file-label"
+                          class="text-lg md:text-xl font-semibold text-slate-700">
+                        Klik atau seret file ke sini
+                    </span>
+
+                    <span class="text-sm text-slate-500 mt-3">
+                        Pilih file dari perangkat Anda
+                    </span>
+
                 </label>
 
-                <button type="submit" name="submit" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-4 text-lg rounded-xl shadow-lg">
+                <!-- Button -->
+                <button
+                    type="submit"
+                    name="submit"
+                    class="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg font-bold shadow-lg transition-all duration-300 hover:scale-[1.01]">
+
                     Unggah Sekarang
+
                 </button>
+
             </form>
 
-            <div class="mt-10 pt-10 border-t-2 border-gray-200">
-                <button onclick="goToPage('list')" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold hover:underline text-sm md:text-base">
-                    <span>👉</span> Lihat Daftar Berkas
+            <!-- Divider -->
+            <div class="my-10 border-t border-slate-200"></div>
+
+            <!-- Navigation -->
+            <div class="text-center">
+
+                <button
+                    onclick="goToPage('list')"
+                    class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold transition">
+
+                    <span class="text-lg">📁</span>
+                    <span>Lihat Daftar Berkas</span>
+
                 </button>
+
             </div>
+
         </div>
     </div>
 
-    <!-- HALAMAN 2: DAFTAR BERKAS -->
-    <div id="page-list" class="w-full max-w-4xl hidden">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">📁 Daftar Berkas</h1>
-                <button onclick="goToPage('upload')" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-xl text-sm md:text-base font-semibold transition">
-                    ➕ Unggah Berkas Baru
-                </button>
-            </div>
-            
-            <div id="file-list-grid" class="space-y-3">
-                <div class="flex justify-center items-center py-12">
-                    <div class="flex flex-col items-center space-y-2">
-                        <div class="loading-spinner"></div>
-                        <span class="text-gray-400 text-sm">Memuat berkas...</span>
-                    </div>
+    <!-- PAGE LIST -->
+    <div id="page-list" class="max-w-5xl mx-auto hidden">
+
+        <div class="glass-card rounded-3xl shadow-2xl border border-white/60 p-6 md:p-10">
+
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-8">
+
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-slate-800">
+                        Daftar Berkas
+                    </h1>
+
+                    <p class="text-slate-500 mt-2 text-sm">
+                        Semua file yang telah diunggah akan muncul di sini.
+                    </p>
                 </div>
+
+                <button
+                    onclick="goToPage('upload')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-md transition">
+
+                    + Upload Baru
+
+                </button>
+
             </div>
+
+            <!-- File List -->
+            <div id="file-list-grid" class="space-y-4">
+
+                <div class="flex flex-col items-center justify-center py-14 space-y-3">
+
+                    <div class="loading-spinner"></div>
+
+                    <span class="text-sm text-slate-500">
+                        Memuat daftar berkas...
+                    </span>
+
+                </div>
+
+            </div>
+
         </div>
+
     </div>
 
-    <script>
-        // Navigasi antar halaman
-        function goToPage(page) {
-            const uploadPage = document.getElementById('page-upload');
-            const listPage = document.getElementById('page-list');
-            
-            if (page === 'upload') {
-                listPage.classList.add('hidden');
-                uploadPage.classList.remove('hidden');
-                window.scrollTo(0, 0);
-            } else if (page === 'list') {
-                uploadPage.classList.add('hidden');
-                listPage.classList.remove('hidden');
-                loadFiles();
-                window.scrollTo(0, 0);
-            }
+<script>
+
+    // Navigasi Halaman
+    function goToPage(page) {
+
+        const uploadPage = document.getElementById('page-upload');
+        const listPage = document.getElementById('page-list');
+
+        if (page === 'upload') {
+
+            listPage.classList.add('hidden');
+            uploadPage.classList.remove('hidden');
+
+        } else {
+
+            uploadPage.classList.add('hidden');
+            listPage.classList.remove('hidden');
+
+            loadFiles();
         }
 
-        // Mengubah teks petunjuk saat file dipilih
-        function updateFileName() {
-            const input = document.getElementById('fileToUpload');
-            const label = document.getElementById('file-label');
-            if(input.files.length > 0) {
-                label.innerText = "✓ Berkas terpilih: " + input.files[0].name;
-                label.classList.remove('text-gray-600');
-                label.classList.add('text-blue-600', 'font-bold');
-            }
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    // Update Nama File
+    function updateFileName() {
+
+        const input = document.getElementById('fileToUpload');
+        const label = document.getElementById('file-label');
+
+        if (input.files.length > 0) {
+
+            label.innerHTML = `
+                ✓ ${input.files[0].name}
+            `;
+
+            label.classList.remove('text-slate-700');
+            label.classList.add('text-blue-600');
         }
+    }
 
-        // Buka modal preview
-        function openModal(imageSrc) {
-            const modal = document.getElementById('imageModal');
-            const modalImage = document.getElementById('modalImage');
-            modalImage.src = imageSrc;
-            modal.classList.add('active');
+    // Open Modal
+    function openModal(imageSrc) {
+
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+
+        modalImage.src = imageSrc;
+
+        modal.classList.add('active');
+    }
+
+    // Close Modal
+    function closeModal() {
+
+        document
+            .getElementById('imageModal')
+            .classList
+            .remove('active');
+    }
+
+    // Klik luar modal
+    window.onclick = function(event) {
+
+        const modal = document.getElementById('imageModal');
+
+        if (event.target === modal) {
+            closeModal();
         }
+    }
 
-        // Tutup modal
-        function closeModal() {
-            const modal = document.getElementById('imageModal');
-            modal.classList.remove('active');
-        }
+    // Load Files
+    async function loadFiles() {
 
-        // Tutup modal saat klik di luar gambar
-        window.onclick = function(event) {
-            const modal = document.getElementById('imageModal');
-            if (event.target == modal) {
-                modal.classList.remove('active');
-            }
-        }
+        try {
 
-        // Mengambil daftar file dari upload.php
-        async function loadFiles() {
-            try {
-                const response = await fetch('upload.php?aksi=list');
-                const files = await response.json();
-                const fileGrid = document.getElementById('file-list-grid');
-                fileGrid.innerHTML = '';
+            const response = await fetch('upload.php?aksi=list');
 
-                if (files.length === 0) {
-                    fileGrid.innerHTML = `
-                        <div class="py-12 text-center">
-                            <div class="text-5xl mb-3">📭</div>
-                            <p class="text-gray-400 font-semibold text-base">Belum ada berkas.</p>
+            const files = await response.json();
+
+            const fileGrid = document.getElementById('file-list-grid');
+
+            fileGrid.innerHTML = '';
+
+            if (files.length === 0) {
+
+                fileGrid.innerHTML = `
+
+                    <div class="text-center py-16">
+
+                        <div class="text-6xl mb-4">
+                            📂
                         </div>
+
+                        <h3 class="text-xl font-bold text-slate-700">
+                            Belum Ada Berkas
+                        </h3>
+
+                        <p class="text-slate-500 mt-2">
+                            Upload file pertama Anda sekarang.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+            }
+
+            files.forEach(file => {
+
+                const isImage = ['JPG', 'JPEG', 'PNG', 'GIF']
+                    .includes(file.tipe);
+
+                const badgeClass = isImage
+                    ? 'badge-image'
+                    : 'badge-other';
+
+                let previewHTML = '';
+
+                if (isImage) {
+
+                    previewHTML = `
+
+                        <img
+                            src="uploads/${file.nama}"
+                            alt="Preview"
+                            onclick="openModal('uploads/${file.nama}')"
+                            class="w-20 h-20 object-cover rounded-2xl shadow cursor-pointer hover:scale-105 transition"
+                        >
+
                     `;
-                    return;
+
+                } else {
+
+                    previewHTML = `
+
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center text-3xl shadow">
+                            📄
+                        </div>
+
+                    `;
                 }
 
-                files.forEach(file => {
-                    const isImage = ['JPG', 'JPEG', 'PNG', 'GIF'].includes(file.tipe);
-                    const badgeClass = isImage ? 'badge-image' : 'badge-other';
-                    
-                    const item = document.createElement('div');
-                    item.className = 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4 flex items-center justify-between';
-                    
-                    let previewHTML = '';
-                    if (isImage) {
-                        previewHTML = `
-                            <img src="uploads/${file.nama}" alt="Preview" class="w-16 h-16 object-cover rounded-lg cursor-pointer shadow-md" onclick="openModal('uploads/${file.nama}')">
-                        `;
-                    } else {
-                        previewHTML = `
-                            <div class="w-16 h-16 bg-gradient-to-br from-purple-200 to-purple-100 rounded-lg flex items-center justify-center text-2xl">
-                                📄
-                            </div>
-                        `;
-                    }
-                    
-                    item.innerHTML = `
-                        <div class="flex items-center gap-4 flex-grow min-w-0">
+                const item = document.createElement('div');
+
+                item.className =
+                    'bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-lg transition-all';
+
+                item.innerHTML = `
+
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+
+                        <div class="flex items-center gap-4 min-w-0">
+
                             ${previewHTML}
-                            <div class="flex-grow min-w-0">
-                                <p class="text-gray-700 font-semibold text-sm truncate">
+
+                            <div class="min-w-0">
+
+                                <h3 class="font-bold text-slate-800 truncate">
                                     ${file.nama}
-                                </p>
-                                <div class="flex items-center gap-2 mt-2">
-                                    <span class="file-type-badge ${badgeClass}">${file.tipe}</span>
-                                    <span class="text-xs text-gray-500">${file.ukuran}</span>
+                                </h3>
+
+                                <div class="flex items-center gap-2 mt-2 flex-wrap">
+
+                                    <span class="file-type-badge ${badgeClass}">
+                                        ${file.tipe}
+                                    </span>
+
+                                    <span class="text-sm text-slate-500">
+                                        ${file.ukuran}
+                                    </span>
+
                                 </div>
+
                             </div>
+
                         </div>
-                        <div class="ml-3 flex gap-2 flex-shrink-0">
-                            <a href="uploads/${file.nama}" download class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold border border-blue-300">
+
+                        <div class="flex gap-3">
+
+                            <a
+                                href="uploads/${file.nama}"
+                                download
+                                class="px-5 py-2.5 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold transition">
+
                                 Unduh
+
                             </a>
-                            <button type="button" onclick="deleteFile('${file.nama}')" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-semibold border border-red-300">
+
+                            <button
+                                onclick="deleteFile('${file.nama}')"
+                                class="px-5 py-2.5 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-semibold transition">
+
                                 Hapus
+
                             </button>
+
                         </div>
-                    `;
-                    fileGrid.appendChild(item);
-                });
-            } catch (error) {
-                console.error("Gagal memuat berkas:", error);
-                document.getElementById('file-list-grid').innerHTML = `<div class="py-8 text-center text-red-500 text-sm">❌ Error memuat berkas</div>`;
-            }
+
+                    </div>
+
+                `;
+
+                fileGrid.appendChild(item);
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            document.getElementById('file-list-grid').innerHTML = `
+
+                <div class="text-center py-10">
+
+                    <div class="text-5xl mb-3">
+                        ⚠️
+                    </div>
+
+                    <p class="text-red-500 font-semibold">
+                        Gagal memuat daftar berkas
+                    </p>
+
+                </div>
+
+            `;
+        }
+    }
+
+    // Delete File
+    async function deleteFile(filename) {
+
+        const confirmDelete = confirm(
+            `Hapus file "${filename}" ?`
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+
+            await fetch(
+                `upload.php?aksi=hapus&nama=${encodeURIComponent(filename)}`
+            );
+
+            loadFiles();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert('Gagal menghapus file');
+        }
+    }
+
+    // Auto Refresh
+    setInterval(() => {
+
+        const pageList =
+            document.getElementById('page-list');
+
+        if (!pageList.classList.contains('hidden')) {
+
+            loadFiles();
         }
 
-        // Fungsi untuk menghapus file
-        async function deleteFile(filename) {
-            if (confirm(`Apakah Anda yakin ingin menghapus berkas "${filename}"?`)) {
-                try {
-                    await fetch(`upload.php?aksi=hapus&nama=${encodeURIComponent(filename)}`);
-                    loadFiles(); // Muat ulang setelah dihapus
-                } catch (error) {
-                    console.error("Error menghapus file:", error);
-                    alert("Gagal menghapus file");
-                }
-            }
-        }
+    }, 5000);
 
-        // Refresh otomatis setiap 5 detik saat di halaman list
-        setInterval(() => {
-            if (!document.getElementById('page-list').classList.contains('hidden')) {
-                loadFiles();
-            }
-        }, 5000);
-    </script>
+</script>
+
 </body>
 </html>
